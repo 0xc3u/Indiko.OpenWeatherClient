@@ -88,4 +88,12 @@ public sealed class Day : Weather
     [JsonPropertyName("snow")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public float? Snow { get; init; }
+
+    /// <summary>
+    /// Gets the Probability Of Precipitation for the specific hour unit specified.
+    /// This property will be ignored when writing to JSON if the value is null.
+    /// </summary>
+    [JsonPropertyName("pop")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public float? ProbabilityOfPrecipitation { get; init; }
 }
