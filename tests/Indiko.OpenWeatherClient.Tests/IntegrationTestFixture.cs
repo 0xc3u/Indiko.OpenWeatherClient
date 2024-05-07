@@ -10,7 +10,7 @@ public class IntegrationTestFixture : IDisposable
     {
         // Initialize the test environment
         OpenWeatherClient = new OpenWeatherClient();
-        ApiKey = "912478bc99153f9f23fbbfbb05572322";
+        ApiKey = "332323232323232323";
     }
 
     public void Dispose()
