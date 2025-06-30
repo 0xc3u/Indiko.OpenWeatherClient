@@ -14,4 +14,8 @@ public interface IOpenWeatherClient
 
     Uri GetMapTileUri(OpenWeatherMapTileRequest mapTileRequest);
     Task<byte[]> GetMapTileAsync(OpenWeatherMapTileRequest mapTileRequest, CancellationToken cancellationToken = default);
+
+    Task<AirPollutionResponse> GetCurrentAirPollutionAsync(AirPollutionRequest request, CancellationToken cancellationToken = default);
+    Task<AirPollutionResponse> GetAirPollutionForecastAsync(AirPollutionRequest request, CancellationToken cancellationToken = default);
+    Task<AirPollutionResponse> GetHistoricalAirPollutionAsync(AirPollutionRequest request, CancellationToken cancellationToken = default);
 }
