@@ -177,6 +177,69 @@ public class OpenWeatherClient : IOpenWeatherClient, IDisposable
         return response;
     }
 
+    /// <summary>
+    /// Asynchronously registers a weather station with the OpenWeather API.
+    /// </summary>
+    /// <param name="request">Configuration for the weather station registration request.</param>
+    /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+    /// <returns>A <see cref="WeatherStationResponse"/> object containing the registered weather station data.</returns>
+    public async Task<WeatherStationResponse> RegisterWeatherStationAsync(WeatherStationRequest request, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(request.ApiKey))
+        {
+            throw new ArgumentNullException(nameof(request.ApiKey));
+        }
+
+        if (string.IsNullOrEmpty(request.ExternalId))
+        {
+            throw new ArgumentNullException(nameof(request.ExternalId));
+        }
+
+        if (string.IsNullOrEmpty(request.Name))
+        {
+            throw new ArgumentNullException(nameof(request.Name));
+        }
+
+        var requestUrl = $"https://api.openweathermap.org/data/3.0/stations?appid={request.ApiKey}";
+        
+        var requestBody = new
+        {
+            external_id = request.ExternalId,
+            name = request.Name,
+            latitude = request.Latitude,
+            longitude = request.Longitude,
+            altitude = request.Altitude
+        };
+
+        var jsonContent = JsonSerializer.Serialize(requestBody, _jsonSerializerOptions);
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl)
+        {
+            Content = httpContent
+        };
+
+        var response = await _httpClient.SendAsync(requestMessage, cancellationToken)
+                                .ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case System.Net.HttpStatusCode.Created:
+                {
+                    var content = await response.Content.ReadAsStringAsync(cancellationToken)
+                                        .ConfigureAwait(false);
+
+                    return JsonSerializer.Deserialize<WeatherStationResponse>(content, _jsonSerializerOptions);
+                }
+            default:
+                {
+                    var content = await response.Content.ReadAsStringAsync(cancellationToken)
+                                          .ConfigureAwait(false);
+                    throw new OpenWeatherException((int)response.StatusCode, content);
+                }
+        }
+    }
+
     public void Dispose()
     {
         if (_httpClient != null)
