@@ -18,4 +18,5 @@ public interface IOpenWeatherClient
     Task<AirPollutionResponse> GetCurrentAirPollutionAsync(AirPollutionRequest request, CancellationToken cancellationToken = default);
     Task<AirPollutionResponse> GetAirPollutionForecastAsync(AirPollutionRequest request, CancellationToken cancellationToken = default);
     Task<AirPollutionResponse> GetHistoricalAirPollutionAsync(AirPollutionRequest request, CancellationToken cancellationToken = default);
+    Task<WeatherStationResponse> RegisterWeatherStationAsync(WeatherStationRequest request, CancellationToken cancellationToken = default);
 }
