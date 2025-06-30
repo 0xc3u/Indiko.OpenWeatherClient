@@ -14,4 +14,6 @@ public interface IOpenWeatherClient
 
     Uri GetMapTileUri(OpenWeatherMapTileRequest mapTileRequest);
     Task<byte[]> GetMapTileAsync(OpenWeatherMapTileRequest mapTileRequest, CancellationToken cancellationToken = default);
+
+    Task<WeatherStationResponse> RegisterWeatherStationAsync(WeatherStationRequest request, CancellationToken cancellationToken = default);
 }
