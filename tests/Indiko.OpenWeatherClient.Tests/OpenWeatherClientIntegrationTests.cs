@@ -14,8 +14,8 @@ public class OpenWeatherClientIntegrationTests(IntegrationTestFixture fixture) :
         var request = new OpenWeatherRequest
         {
             ApiKey = _fixture.ApiKey,
-            Latitude = 40.712776,
-            Longitude = -74.005974,
+            Latitude = 47.4299327,
+            Longitude = 8.6855134,
             Language = Constants.Languages.English,
             Unit = Constants.Units.Metric,
             Excludes = [Constants.Excludes.Minutely, Constants.Excludes.Daily, Constants.Excludes.Hourly]
@@ -35,8 +35,8 @@ public class OpenWeatherClientIntegrationTests(IntegrationTestFixture fixture) :
         var request = new OpenWeatherRequest
         {
             ApiKey = _fixture.ApiKey,
-            Latitude = 40.712776,
-            Longitude = -74.005974,
+            Latitude = 46.979551666666666,
+            Longitude = 8.253168333333333,
             Language = Constants.Languages.English,
             Unit = Constants.Units.Metric,
             Excludes = [Constants.Excludes.Minutely, Constants.Excludes.Hourly, Constants.Excludes.Current]
@@ -56,8 +56,8 @@ public class OpenWeatherClientIntegrationTests(IntegrationTestFixture fixture) :
         var request = new OpenWeatherRequest
         {
             ApiKey = _fixture.ApiKey,
-            Latitude = 40.712776,
-            Longitude = -74.005974,
+            Latitude = 47.4299327,
+            Longitude = 8.6855134,
             Language = Constants.Languages.English,
             Unit = Constants.Units.Metric,
             Excludes = [Constants.Excludes.Minutely, Constants.Excludes.Daily, Constants.Excludes.Current]
@@ -90,4 +90,28 @@ public class OpenWeatherClientIntegrationTests(IntegrationTestFixture fixture) :
         // Assert
         result.Should().NotBeNull();
     }
+
+
+    [Fact]
+    public async Task GetWeatherForNextDayAsync_ReturnsCorrectWeatherData()
+    {
+        // Arrange
+        var request = new OpenWeatherRequest
+        {
+            ApiKey = _fixture.ApiKey,
+            Latitude = 40.712776,
+            Longitude = -74.005974,
+            Language = Constants.Languages.English,
+            Unit = Constants.Units.Metric,
+            Excludes = [Constants.Excludes.Minutely],
+            Date = DateTime.Now.AddDays(1)
+        };
+
+        // Act
+        var result = await _fixture.OpenWeatherClient.GetWeatherAsync(request);
+
+        // Assert
+        result.Should().NotBeNull();
+    }
+
 }
