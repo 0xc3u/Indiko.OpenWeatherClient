@@ -249,4 +249,85 @@ public class OpenWeatherClient : IOpenWeatherClient, IDisposable
             _httpClient = null;
         }
     }
+
+    /// <summary>
+    /// Asynchronously retrieves the current air pollution data.
+    /// </summary>
+    /// <param name="request">Configuration for the air pollution API request.</param>
+    /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+    /// <returns>An <see cref="AirPollutionResponse"/> object containing current air pollution data.</returns>
+    public async Task<AirPollutionResponse> GetCurrentAirPollutionAsync(AirPollutionRequest request, CancellationToken cancellationToken = default)
+    {
+        return await GetAirPollutionResponseInternal(request, AirPollutionType.Current, cancellationToken);
+    }
+
+    /// <summary>
+    /// Asynchronously retrieves the air pollution forecast data.
+    /// </summary>
+    /// <param name="request">Configuration for the air pollution API request.</param>
+    /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+    /// <returns>An <see cref="AirPollutionResponse"/> object containing air pollution forecast data.</returns>
+    public async Task<AirPollutionResponse> GetAirPollutionForecastAsync(AirPollutionRequest request, CancellationToken cancellationToken = default)
+    {
+        return await GetAirPollutionResponseInternal(request, AirPollutionType.Forecast, cancellationToken);
+    }
+
+    /// <summary>
+    /// Asynchronously retrieves the historical air pollution data.
+    /// </summary>
+    /// <param name="request">Configuration for the air pollution API request.</param>
+    /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+    /// <returns>An <see cref="AirPollutionResponse"/> object containing historical air pollution data.</returns>
+    public async Task<AirPollutionResponse> GetHistoricalAirPollutionAsync(AirPollutionRequest request, CancellationToken cancellationToken = default)
+    {
+        return await GetAirPollutionResponseInternal(request, AirPollutionType.Historical, cancellationToken);
+    }
+
+    private async Task<AirPollutionResponse> GetAirPollutionResponseInternal(AirPollutionRequest request, AirPollutionType type, CancellationToken cancellationToken = default)
+    {
+        AirPollutionRequestBuilder requestBuilder = new(request.ApiKey);
+        requestBuilder.WithLocation(request.Latitude, request.Longitude);
+
+        if (type == AirPollutionType.Historical && request.StartDate.HasValue && request.EndDate.HasValue)
+        {
+            requestBuilder.WithDateRange(request.StartDate.Value, request.EndDate.Value);
+        }
+
+        Uri requestUrl = type switch
+        {
+            AirPollutionType.Current => requestBuilder.BuildCurrent(),
+            AirPollutionType.Forecast => requestBuilder.BuildForecast(),
+            AirPollutionType.Historical => requestBuilder.BuildHistorical(),
+            _ => throw new ArgumentException("Invalid air pollution type")
+        };
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+        var response = await _httpClient.SendAsync(requestMessage, cancellationToken)
+                                .ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case System.Net.HttpStatusCode.OK:
+                {
+                    var content = await response.Content.ReadAsStringAsync(cancellationToken)
+                                        .ConfigureAwait(false);
+
+                    return JsonSerializer.Deserialize<AirPollutionResponse>(content, _jsonSerializerOptions);
+                }
+            default:
+                {
+                    var content = await response.Content.ReadAsStringAsync(cancellationToken)
+                                          .ConfigureAwait(false);
+                    throw new OpenWeatherException((int)response.StatusCode, content);
+                }
+        }
+    }
+
+    private enum AirPollutionType
+    {
+        Current,
+        Forecast,
+        Historical
+    }
 }
